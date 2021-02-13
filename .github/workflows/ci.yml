@@ -9,16 +9,6 @@ jobs:
   build:
     if: "!contains(github.event.head_commit.message, ':bookmark:')"
     runs-on: ubuntu-latest
-    services:
-      mongodb:
-        image: mongo:4.2.6
-        ports:
-          - 27017:27017
-      rabbitmq:
-        image: rabbitmq:3.5.4
-        ports:
-          - 5672:5672
-
     steps:
       - name: Cancel Previous Runs
         uses: styfle/cancel-workflow-action@0.7.0
