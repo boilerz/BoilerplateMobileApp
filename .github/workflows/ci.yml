@@ -53,5 +53,8 @@ jobs:
         if: steps.yarn-cache.outputs.cache-hit != 'true' # Check cache
         run: yarn
 
+      - name: Lint
+        run: yarn lint
+
       - name: Run Tests
         run: yarn test
