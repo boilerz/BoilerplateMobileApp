@@ -7,9 +7,13 @@
 
 ### Customization
 
-Renaming project name and bundle identifier (android only):
+- [ ] Renaming project name and bundle identifier (android only):
 
 ```shell
 npx react-native-rename <newName> -b <bundleIdentifier>
 open ios/<newName>.xcworkspace // manually update the ios bundle identifier
 ```
+
+- [ ] Update `secrets.*` var names on `.github/workflows/*` files.
+
+- [ ] Update this readme badges and docs :-)

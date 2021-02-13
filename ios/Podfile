@@ -3,6 +3,21 @@ require_relative '../node_modules/@react-native-community/cli-platform-ios/nativ
 
 platform :ios, '10.0'
 
+# @credit https://stackoverflow.com/questions/13208202/ignore-xcode-warnings-when-using-cocoapods/13209057#13209057
+# ignore pods warnings
+inhibit_all_warnings!
+
+# @credit https://github.com/facebook/react-native/issues/29255
+def min_OSTarget_post_install(installer)
+  installer.pods_project.targets.each do |target|
+    target.build_configurations.each do |config|
+      if Gem::Version.new('9.0') > Gem::Version.new(config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'])
+        config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '9.0'
+      end
+    end
+  end
+end
+
 target 'BoilerplateMobileApp' do
   config = use_native_modules!
 
@@ -20,6 +35,9 @@ target 'BoilerplateMobileApp' do
   use_flipper!
   post_install do |installer|
     flipper_post_install(installer)
+
+    # @see https://github.com/facebook/react-native/issues/29255
+    min_OSTarget_post_install(installer)
   end
 end
 
