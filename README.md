@@ -1,5 +1,6 @@
 # BoilerplateMobileApp
 
+[![GH CI Action](https://github.com/boilerz/BoilerplateMobileApp/workflows/CI/badge.svg)](https://github.com/boilerz/BoilerplateMobileApp/actions?query=workflow:CI)
 > React native Mobile App.
 
 ### Customization
