@@ -1,4 +1,4 @@
-package org.boilerz;
+package org.boilerz.boilerplatemobileapp;
 
 import com.facebook.react.ReactActivity;
 
