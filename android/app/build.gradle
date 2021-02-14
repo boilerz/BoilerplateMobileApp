@@ -129,7 +129,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "com.boilerplatemobileapp"
+        applicationId "org.boilerz"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
