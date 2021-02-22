@@ -19,7 +19,7 @@
   "devDependencies": {
     "@babel/core": "^7.12.17",
     "@babel/runtime": "^7.12.18",
-    "@boilerz/eslint-config": "2.0.12",
+    "@boilerz/eslint-config": "2.0.13",
     "@boilerz/prettier-config": "^1.0.3",
     "@boilerz/tsconfig": "^1.4.6",
     "@types/jest": "^26.0.20",
