@@ -1,6 +1,20 @@
 apply plugin: "com.android.application"
 
 import com.android.build.OutputFile
+import groovy.json.JsonSlurper
+
+def getNpmVersion() {
+    def inputFile = new File(rootProject.projectDir.getPath(), "../package.json")
+    def packageJson = new JsonSlurper().parseText(inputFile.text)
+    return packageJson["version"]
+}
+
+def getVersionCode() {
+    def versionPropsFile = file('version.properties')
+    Properties versionProps = new Properties()
+    versionProps.load(new FileInputStream(versionPropsFile))
+    return versionProps['VERSION_CODE'].toInteger()
+}
 
 /**
  * The react.gradle file registers a task for each build variant (e.g. bundleDebugJsAndAssets
@@ -132,8 +146,8 @@ android {
         applicationId "org.boilerz.boilerplatemobileapp"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 1
-        versionName "1.0"
+        versionCode getVersionCode()
+        versionName getNpmVersion()
     }
     splits {
         abi {
