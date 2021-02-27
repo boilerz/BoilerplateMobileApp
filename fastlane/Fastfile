@@ -1,0 +1,56 @@
+fastlane_version  '2.174.0'
+
+# This file store the android version code
+ANDROID_VERSION_PROPERTIES_FILE_PATH = "android/app/version.properties"
+APP_JSON_PATH = "./app.json"
+PACKAGE_JSON_PATH = "./package.json"
+
+before_all do
+  ensure_git_status_clean
+  git_pull
+end
+
+# iOS Lanes
+platform :ios do
+end
+
+# Android Lanes
+platform :android do
+end
+
+desc 'Update version number and version code'
+desc "####Example:"
+desc "```\nfastlane bump version:minor\n```"
+desc "####Options"
+desc " * **`version`**: The version type. (eg: `patch`, `minor`, `major`)"
+desc ""
+lane :bump do |options|
+  # version
+  yarn(command: "version --no-git-tag-version --no-commit-hooks --#{options[:version]}")
+
+  # Bump Android version code
+  version_code = get_properties_value(
+    path: ANDROID_VERSION_PROPERTIES_FILE_PATH,
+    key: "VERSION_CODE"
+  )
+  set_properties_value(
+    path: ANDROID_VERSION_PROPERTIES_FILE_PATH,
+    key: "VERSION_CODE",
+    value: version_code.to_i + 1
+  )
+
+  # Bump iOs version number and version code
+  app = load_json(json_path: APP_JSON_PATH)
+  package = load_json(json_path: PACKAGE_JSON_PATH)
+  xcodeproj = "ios/#{app["name"]}.xcodeproj"
+
+  increment_version_number(xcodeproj: xcodeproj, version_number: package["version"])
+  increment_build_number(xcodeproj: xcodeproj)
+
+  # Commit and tag
+  git_commit(
+    path: ["android", "ios", "./package.json"],
+    message: ":bookmark: v#{package["version"]}"
+  )
+  add_git_tag(tag: "v#{package["version"]}")
+end
