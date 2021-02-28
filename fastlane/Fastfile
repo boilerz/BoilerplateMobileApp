@@ -19,9 +19,9 @@ platform :android do
 end
 
 desc 'Update version number and version code'
-desc "####Example:"
+desc "#### Example:"
 desc "```\nfastlane bump version:minor\n```"
-desc "####Options"
+desc "#### Options"
 desc " * **`version`**: The version type. (eg: `patch`, `minor`, `major`)"
 desc ""
 lane :bump do |options|

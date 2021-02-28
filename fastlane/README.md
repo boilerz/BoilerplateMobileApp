@@ -21,13 +21,13 @@ fastlane bump
 ```
 Update version number and version code
 
-####Example:
+#### Example:
 
 ```
 fastlane bump version:minor
 ```
 
-####Options
+#### Options
 
  * **`version`**: The version type. (eg: `patch`, `minor`, `major`)
 
