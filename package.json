@@ -26,7 +26,7 @@
     "@boilerz/eslint-config": "2.0.16",
     "@boilerz/jest-config": "^1.0.5",
     "@boilerz/prettier-config": "^1.0.3",
-    "@boilerz/tsconfig": "^1.4.6",
+    "@boilerz/tsconfig": "^1.4.7",
     "@types/jest": "^26.0.20",
     "@types/react-native": "^0.63.50",
     "@types/react-test-renderer": "^17.0.1",
