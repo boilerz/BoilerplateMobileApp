@@ -34,9 +34,6 @@ jobs:
       - name: Lint 👓
         run: yarn lint
 
-      - name: Build output 🛠
-        run: yarn build
-
       - name: Run Tests ✅
         run: yarn test
 
