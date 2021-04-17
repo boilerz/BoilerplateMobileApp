@@ -1,17 +1,116 @@
-fastlane_version  '2.174.0'
+fastlane_version  '2.180.1'
+fastlane_require 'dotenv'
+fastlane_require 'spaceship'
+require_relative './helper/app'
+require_relative './helper/app-store-connect'
 
 # This file store the android version code
-ANDROID_VERSION_PROPERTIES_FILE_PATH = "android/app/version.properties"
-APP_JSON_PATH = "./app.json"
-PACKAGE_JSON_PATH = "./package.json"
+ANDROID_VERSION_PROPERTIES_FILE_PATH = 'android/app/version.properties'
+APP_IDENTIFIER = ENV['APP_IDENTIFIER']
 
 before_all do
+  Dotenv.overload '.env.secret'
   ensure_git_status_clean
   git_pull
 end
 
 # iOS Lanes
 platform :ios do
+  desc 'Connection to app store connect'
+  private_lane :connect_api do
+    app_store_connect_api_key(
+      issuer_id: ENV['SPACESHIP_CONNECT_API_ISSUER_ID'],
+      key_id: ENV['SPACESHIP_CONNECT_API_KEY_ID'],
+      key_content: ENV['SPACESHIP_CONNECT_API_KEY'],
+      in_house: false
+    )
+  end
+
+  desc 'Create app (not CI friendly, using 2FA)'
+  lane :create_app do
+    create_app_identifier(
+      identifier: APP_IDENTIFIER,
+      description: "Demo"
+    )
+    produce(
+      username: ENV['IOS_USERNAME'],
+      company_name: ENV['IOS_APP_COMPANY_NAME'],
+      language: ENV['IOS_APP_PRIMARY_LANGUAGE'],
+      app_identifier: APP_IDENTIFIER,
+      app_name: app_name,
+      app_version: app_version
+    )
+  end
+
+  desc 'Create app identifier and fetch certificates and provisioning profiles'
+  private_lane :code_signing do |options|
+    force_for_new_devices = defined?(options[:force_for_new_devices]) ? options[:force_for_new_devices] : false
+    readonly = defined?(options[:readonly]) && options[:readonly]
+    environment = options[:environment]
+    identifier = "#{APP_IDENTIFIER}.#{environment}"
+    puts "📦 Check app id #{identifier} for #{environment} (force_for_new_devices: #{force_for_new_devices}, readonly: #{readonly})"
+    create_app_identifier(
+      identifier: identifier,
+      description: "#{app_name} #{environment}"
+    )
+    match(
+      app_identifier: identifier,
+      type: options[:type],
+      force_for_new_devices: force_for_new_devices,
+      readonly: readonly
+    )
+  end
+
+  desc 'Fetch certificates and provisioning profiles'
+  lane :certificates do |options|
+    readonly = defined?(options[:readonly]) && options[:readonly]
+
+    connect_api()
+
+    begin
+      unlock_keychain(
+        path: app_name,
+        password: ENV['MATCH_KEYCHAIN_PASSWORD']
+      )
+    rescue StandardError
+      create_keychain(
+        name: app_name,
+        password: ENV['MATCH_KEYCHAIN_PASSWORD'],
+      )
+    end
+
+    match(
+      app_identifier: APP_IDENTIFIER,
+      type: 'appstore',
+      readonly: readonly
+    )
+    code_signing(
+      environment: 'debug',
+      type: 'development',
+      readonly: readonly
+    )
+    code_signing(
+      environment: 'staging',
+      type: 'adhoc',
+      force_for_new_devices: true,
+      readonly: readonly
+    )
+    code_signing(
+      environment: 'production',
+      type: 'adhoc',
+      force_for_new_devices: true,
+      readonly: readonly
+    )
+  end
+
+  desc 'Nuke certificates'
+  lane :nuke_certificates do
+    team_id = ENV['IOS_TEAM_ID']
+    api_key = connect_api()
+
+    match_nuke(type: 'development', api_key: api_key, team_id: team_id)
+    match_nuke(type: 'adhoc', api_key: api_key, team_id: team_id)
+  end
 end
 
 # Android Lanes
@@ -19,11 +118,11 @@ platform :android do
 end
 
 desc 'Update version number and version code'
-desc "#### Example:"
-desc "```\nfastlane bump version:minor\n```"
-desc "#### Options"
-desc " * **`version`**: The version type. (eg: `patch`, `minor`, `major`)"
-desc ""
+desc '#### Example:'
+desc '```fastlane bump version:minor```'
+desc '#### Options'
+desc ' * **`version`**: The version type. (eg: `patch`, `minor`, `major`)'
+desc ''
 lane :bump do |options|
   # version
   yarn(command: "version --no-git-tag-version --no-commit-hooks --#{options[:version]}")
@@ -31,26 +130,25 @@ lane :bump do |options|
   # Bump Android version code
   version_code = get_properties_value(
     path: ANDROID_VERSION_PROPERTIES_FILE_PATH,
-    key: "VERSION_CODE"
+    key: 'VERSION_CODE'
   )
   set_properties_value(
     path: ANDROID_VERSION_PROPERTIES_FILE_PATH,
-    key: "VERSION_CODE",
+    key: 'VERSION_CODE',
     value: version_code.to_i + 1
   )
 
   # Bump iOs version number and version code
-  app = load_json(json_path: APP_JSON_PATH)
-  package = load_json(json_path: PACKAGE_JSON_PATH)
-  xcodeproj = "ios/#{app["name"]}.xcodeproj"
+  version = app_version
+  xcodeproj = "ios/#{app_name}.xcodeproj"
 
-  increment_version_number(xcodeproj: xcodeproj, version_number: package["version"])
+  increment_version_number(xcodeproj: xcodeproj, version_number: version)
   increment_build_number(xcodeproj: xcodeproj)
 
   # Commit and tag
   git_commit(
-    path: ["android", "ios", "./package.json"],
-    message: ":bookmark: v#{package["version"]}"
+    path: ['android', 'ios', './package.json'],
+    message: ":bookmark: v#{version}"
   )
-  add_git_tag(tag: "v#{package["version"]}")
+  add_git_tag(tag: "v#{version}")
 end

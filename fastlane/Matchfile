@@ -1,0 +1,6 @@
+# For all available options run `fastlane match --help`
+# The docs are available on https://docs.fastlane.tools/actions/match
+
+# Storage
+storage_mode('git')
+git_url(ENV['IOS_APP_CERTIFICATES_GIT_REPO_URL'])

@@ -14,7 +14,9 @@
     "bump": "bundle exec fastlane bump",
     "bump:patch": "yarn bump version:patch",
     "bump:minor": "yarn bump version:minor",
-    "bump:major": "yarn bump version:major"
+    "bump:major": "yarn bump version:major",
+    "ios:certificates:nuke": "bundle exec fastlane ios nuke_certificates",
+    "ios:certificates": "bundle exec fastlane ios certificates readonly:true"
   },
   "dependencies": {
     "react": "17.0.1",

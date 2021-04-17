@@ -23,15 +23,32 @@ Update version number and version code
 
 #### Example:
 
-```
-fastlane bump version:minor
-```
+```fastlane bump version:minor```
 
 #### Options
 
  * **`version`**: The version type. (eg: `patch`, `minor`, `major`)
 
 
+
+----
+
+## iOS
+### ios create_app
+```
+fastlane ios create_app
+```
+Create app (not CI friendly, using 2FA)
+### ios certificates
+```
+fastlane ios certificates
+```
+Fetch certificates and provisioning profiles
+### ios nuke_certificates
+```
+fastlane ios nuke_certificates
+```
+Nuke certificates
 
 ----
 
